@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/joaovpgomes/Desktop/Projects/community-library/community-library'
+relocations:     []
+...
