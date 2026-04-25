@@ -9,49 +9,47 @@ using namespace std;
 // Backend logic:
 
 class Book {
-
     public:
-
         string title;
         string author;
         string ISBN;
         bool isAvailable;
+        string dateAdd;
 
         Book() {
             title = "";
             author = "";
             ISBN = "";
             isAvailable = true;
+            dateAdd = "";
         }
 
-        Book(string title, string author, string ISBN) {
+        Book(string title, string author, string ISBN, string dateAdd) {
             this->title = title;
             this->author = author;
             this->ISBN = ISBN;
             this->isAvailable = true;
+            this->dateAdd = dateAdd;
         }
 
+        void display() {
+            cout << "  Title:        " << title << endl;
+            cout << "  Author:       " << author << endl;
+            cout << "  ISBN:         " << ISBN << endl;
+            cout << "  Availability: " << (isAvailable ? "Yes" : "No") << endl;
+            cout << "  DateAdd:      " << dateAdd << endl;
+        }
 };
 
 class BookCollection {
-    
     public:
-
         Book books[100];
-        int bookCount; 
+        int bookCount;
         bool publicity;
 
         BookCollection(bool publicity) {
             this->publicity = publicity;
             bookCount = 0;
-        }
-
-        vector<string> getBookList() {
-            vector<string> list;
-            for (int i = 0; i < bookCount; i++) {
-                list.push_back(books[i].ISBN + " | " + books[i].title + " | " + books[i].author);
-            }
-            return list;
         }
 
         void addBook(Book bookToAdd) {
@@ -78,9 +76,7 @@ class BookCollection {
             }
             return false;
         }
-
 };
-
 
 // Interface logic:
 
@@ -185,113 +181,75 @@ string realtimeFlow(string before, vector<string> items) {
     return "";
 }
 
+void printArray(Book arr[], int size) {
+    for (int i = 0; i < size; i++) {
+        cout << "\n  [" << i + 1 << "]" << endl;
+        arr[i].display();
+    }
+}
+
+// Sort:
+
+void insertionSort(Book arr[], int size) {
+    cout << "\n[SORT] Starting Insertion Sort on " << size << " books by title (A-Z)..." << endl;
+    for (int i = 1; i < size; i++) {
+        Book key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j].title > key.title) {
+            cout << "[SORT] Moving \"" << arr[j].title << "\" right to make room for \"" << key.title << "\"" << endl;
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+        cout << "[SORT] Placed \"" << key.title << "\" at position " << j + 1 << endl;
+    }
+    cout << "[SORT] Sort complete." << endl;
+}
 
 // Main:
 
 int main() {
 
-    // Sample data:
+    // --- Correct books ---
+    Book correct1 = Book("The Great Gatsby",      "F. Scott Fitzgerald", "978-0743273565", "2024-01-10");
+    Book correct2 = Book("To Kill a Mockingbird", "Harper Lee",          "978-0061120084", "2024-02-15");
+    Book correct3 = Book("1984",                  "George Orwell",       "978-0451524935", "2024-03-20");
 
-    BookCollection LIBRARY = BookCollection(true);
-    Book book1 = Book("The Great Gatsby", "F. Scott Fitzgerald", "978-0743273565");
-    Book book2 = Book("To Kill a Mockingbird", "Harper Lee", "978-0061120084");
-    Book book3 = Book("1984", "George Orwell", "978-0451524935"); 
-    Book book4 = Book("Moby Dick", "Herman Melville", "978-1503280786");
-    Book book5 = Book("Pride and Prejudice", "Jane Austen", "978-1503290563");
-    LIBRARY.addBook(book1);
-    LIBRARY.addBook(book2);
-    LIBRARY.addBook(book3);
-    LIBRARY.addBook(book4);
-    LIBRARY.addBook(book5);
-    BookCollection SHELF = BookCollection(false);
+    // --- Incorrect books ---
+    Book incorrect1 = Book("",      "Unknown Author", "INVALID-ISBN",    "99/99/9999");
+    Book incorrect2 = Book("12345", "",               "",                "");
+    Book incorrect3 = Book("!@#$%", "???",            "000-0000000000",  "not-a-date");
 
-    // Main menu:
-    
-    vector<MenuOption> mainMenu = {
-        {"Library", [&]() {
-            vector<string> list = LIBRARY.getBookList();
-            string result = realtimeFlow("Library", list);
-            if (!result.empty()) {
-                int first = result.find(" | ");
-                string isbn = result.substr(0, first);
-                Book* book = nullptr;
-                for (int i = 0; i < LIBRARY.bookCount; i++) {
-                    if (LIBRARY.books[i].ISBN == isbn) {
-                        book = &LIBRARY.books[i];
-                        break;
-                    }
-                }
-                if (book != nullptr) {
-                    auto getInfo = [&]() {
-                        return "ISBN: " + book->ISBN + "\n"
-                            "Title: " + book->title + "\n"
-                            "Author: " + book->author + "\n"
-                            "Available: " + (book->isAvailable ? "Yes" : "No");
-                    };
-                    vector<MenuOption> bookMenu = {
-                        {"Change Title", [&]() {
-                            string newTitle = realtimeFlow("New title:", {});
-                            book->title = newTitle;
-                        }},
-                        {"Change Author", [&]() {
-                            string newAuthor = realtimeFlow("New author:", {});
-                            book->author = newAuthor;
-                        }},
-                        {"Borrow", [&]() {
-                            Book copy = *book;
-                            LIBRARY.removeBook(book->ISBN);
-                            SHELF.addBook(copy);
-                            displayMessage("Book borrowed!");
-                        }}
-                    };
-                    displayMenu(getInfo, bookMenu);
-                }
-            }
-        }},
-        {"Shelf", [&]() {
-            vector<string> list = SHELF.getBookList();
-            string result = realtimeFlow("Shelf", list);
-            if (!result.empty()) {
-                int first = result.find(" | ");
-                string isbn = result.substr(0, first);
-                Book* book = nullptr;
-                for (int i = 0; i < SHELF.bookCount; i++) {
-                    if (SHELF.books[i].ISBN == isbn) {
-                        book = &SHELF.books[i];
-                        break;
-                    }
-                }
-                if (book != nullptr) {
-                    auto getInfo = [&]() {
-                        return "ISBN: " + book->ISBN + "\n"
-                            "Title: " + book->title + "\n"
-                            "Author: " + book->author + "\n"
-                            "Available: " + (book->isAvailable ? "Yes" : "No");
-                    };
-                    vector<MenuOption> bookMenu = {
-                        {"Change Title", [&]() {
-                            string newTitle = realtimeFlow("New title:", {});
-                            book->title = newTitle;
-                        }},
-                        {"Change Author", [&]() {
-                            string newAuthor = realtimeFlow("New author:", {});
-                            book->author = newAuthor;
-                        }},
-                        {"Return", [&]() {
-                            Book copy = *book;
-                            SHELF.removeBook(book->ISBN);
-                            LIBRARY.addBook(copy);
-                            displayMessage("Book returned!");
-                        }}
-                    };
-                    displayMenu(getInfo, bookMenu);
-                }
-            }
-        }}
-    };
+    cout << "========== CORRECT BOOKS ==========" << endl;
+    cout << "\n[1]" << endl; correct1.display();
+    cout << "\n[2]" << endl; correct2.display();
+    cout << "\n[3]" << endl; correct3.display();
 
-    displayMenu([]() { return string("Main Menu"); }, mainMenu);
-    cout << "Thank you!" << endl;
-    
+    cout << "\n========== INCORRECT BOOKS ==========" << endl;
+    cout << "\n[1]" << endl; incorrect1.display();
+    cout << "\n[2]" << endl; incorrect2.display();
+    cout << "\n[3]" << endl; incorrect3.display();
+
+    // --- Arrays ---
+    Book arrayA[3] = { correct1, correct2, correct3 }; // ascending
+    Book arrayB[3] = { correct3, correct2, correct1 }; // descending
+    Book arrayC[3] = { correct2, correct3, correct1 }; // mixed
+
+    cout << "\n========== BEFORE SORT ==========" << endl;
+    cout << "\n--- Array A (ascending added) ---" << endl;  printArray(arrayA, 3);
+    cout << "\n--- Array B (descending added) ---" << endl; printArray(arrayB, 3);
+    cout << "\n--- Array C (mixed added) ---" << endl;      printArray(arrayC, 3);
+
+    insertionSort(arrayA, 3);
+    insertionSort(arrayB, 3);
+    insertionSort(arrayC, 3);
+
+    cout << "\n========== AFTER SORT ==========" << endl;
+    cout << "\n--- Array A (sorted) ---" << endl;  printArray(arrayA, 3);
+    cout << "\n--- Array B (sorted) ---" << endl;  printArray(arrayB, 3);
+    cout << "\n--- Array C (sorted) ---" << endl;  printArray(arrayC, 3);
+
+    cout << "\n========== END OF TESTS ==========" << endl;
+
     return 0;
 }
