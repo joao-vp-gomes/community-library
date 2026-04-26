@@ -71,13 +71,13 @@ class EBook : public Book {
         }
 };
 
-class BookCollection {
+class Library {
     public:
         Book books[100];
         int bookCount;
         bool publicity;
 
-        BookCollection(bool publicity) {
+        Library(bool publicity) {
             this->publicity = publicity;
             bookCount = 0;
         }
@@ -354,7 +354,7 @@ int assessment1() {
 
     // Sample data:
 
-    BookCollection LIBRARY = BookCollection(true);
+    Library LIBRARY = Library(true);
     Book book1 = Book("The Great Gatsby", "F. Scott Fitzgerald", "978-0743273565", "01-04-2026");
     Book book2 = Book("To Kill a Mockingbird", "Harper Lee", "978-0061120084", "01-04-2026");
     Book book3 = Book("1984", "George Orwell", "978-0451524935", "01-04-2026"); 
@@ -365,7 +365,7 @@ int assessment1() {
     LIBRARY.addBook(book3);
     LIBRARY.addBook(book4);
     LIBRARY.addBook(book5);
-    BookCollection SHELF = BookCollection(false);
+    Library SHELF = Library(false);
 
     // Main menu:
     
