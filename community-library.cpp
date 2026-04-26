@@ -41,6 +41,36 @@ class Book {
         }
 };
 
+class HardcopyBook : public Book {
+    public:
+        string shelfNumber;
+
+        HardcopyBook(string title, string author, string ISBN, string dateAdd, string shelfNumber)
+            : Book(title, author, ISBN, dateAdd) {
+            this->shelfNumber = shelfNumber;
+        }
+
+        void display() {
+            Book::display();
+            cout << "  Shelf Number: " << shelfNumber << endl;
+        }
+};
+
+class EBook : public Book {
+    public:
+        string licenseEndDate;
+
+        EBook(string title, string author, string ISBN, string dateAdd, string licenseEndDate)
+            : Book(title, author, ISBN, dateAdd) {
+            this->licenseEndDate = licenseEndDate;
+        }
+
+        void display() {
+            Book::display();
+            cout << "  License End:  " << licenseEndDate << endl;
+        }
+};
+
 class BookCollection {
     public:
         Book books[100];
